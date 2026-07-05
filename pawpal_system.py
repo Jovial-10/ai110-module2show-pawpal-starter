@@ -1,7 +1,7 @@
 """Logic layer for PawPal+: Owner, Pet, Task, and Scheduler classes."""
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
@@ -9,6 +9,7 @@ class Task:
     name: str
     duration: int
     priority: str
+    start_time: Optional[str] = None
     completed: bool = False
 
     def get_priority(self) -> str:
@@ -45,6 +46,7 @@ class Owner:
         self.age = age
         self.gender = gender
         self.pets: List[Pet] = []
+        self.preferences: List[str] = []
 
     def add_pet(self, pet: Pet) -> None:
         pass
@@ -55,6 +57,9 @@ class Owner:
     def get_pets(self) -> List[Pet]:
         pass
 
+    def get_preferences(self) -> List[str]:
+        pass
+
 
 class Scheduler:
     def __init__(self, time_available: int):
@@ -62,10 +67,11 @@ class Scheduler:
         self.plan: List[Task] = []
 
     def generate_plan(self, pet: Pet) -> List[Task]:
-        pass
+        self.plan = []
+        return self.plan
 
     def get_plan(self) -> List[Task]:
         pass
 
-    def add_task(self, task: Task) -> None:
+    def schedule_task(self, task: Task) -> None:
         pass

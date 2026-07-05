@@ -14,12 +14,15 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+It includes all 4 main classes with attributes and methods that will be useful for the app.
 - What classes did you include, and what responsibilities did you assign to each?
+Owner, Pet, Task, Scheduler. Owner will have methods to add Pets and getter methods for Owner like name. Pet will have attributes to make it unique and methods like addFood or addTask. Task will have have attributes like duration and priority and methods like markComplete to assist with the Scheduler class. Scheduler will allow users to generate schedules according to what Tasks they have and their other constraints such as time.
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+Yes, I made a few small changes after reviewing my first skeleton. I added a preferences attribute to Owner since the README said the scheduler should consider owner preferences, but I hadn't included that anywhere yet. I also added a start_time attribute to Task so I can later check if tasks overlap, since duration alone wasn't enough to detect scheduling conflicts. I made generate_plan in Scheduler actually set self.plan instead of just returning a list, so get_plan won't return old or empty data after a new plan is made. Lastly, I renamed Scheduler's add_task method to schedule_task, since Pet already had its own add_task method and having two methods with the same name but different purposes was confusing.
 
 ---
 
