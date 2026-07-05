@@ -2,6 +2,15 @@
 
 ## 1. System Design
 
+- 3 core actions a user should be able to perform using this app. 
+1. Add and customize user and pet info
+2. Generate a unique daily schedule based on constraints/priorities
+3. Display the plan in a simple and understandable way
+
+# Brainstorming - Objects/attributes for the class: Pet (color, type, hunger, name), 
+# Owner (name, age, gender), Schedule (task, business), etc
+# Methods for those classes: getName, addFood, addTask, getPlan, etc
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
