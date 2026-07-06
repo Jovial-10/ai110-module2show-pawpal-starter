@@ -101,6 +101,22 @@ class Scheduler:
         """Return the most recently generated plan."""
         return self.plan
 
+    def sort_by_time(self) -> List[Tuple[Pet, Task]]:
+        """Sort the current plan by each task's start_time ("HH:MM"); tasks with no start_time sort last."""
+        self.plan.sort(key=lambda pair: pair[1].start_time or "99:99")
+        return self.plan
+
+    def filter_tasks(
+        self, completed: Optional[bool] = None, pet_name: Optional[str] = None
+    ) -> List[Tuple[Pet, Task]]:
+        """Return plan entries filtered by completion status and/or pet name."""
+        return [
+            (pet, task)
+            for pet, task in self.plan
+            if (completed is None or task.completed == completed)
+            and (pet_name is None or pet.name == pet_name)
+        ]
+
     def schedule_task(self, pet: Pet, task: Task) -> None:
         """Manually append a (pet, task) pair to the current plan."""
         self.plan.append((pet, task))
