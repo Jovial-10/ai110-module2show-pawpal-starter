@@ -36,7 +36,10 @@ Yes, I made a few small changes after reviewing my first skeleton. I added a pre
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+One tradeoff the scheduler makes it that it sorts generate_plan by priority, then packs greedily, even if it is not the most optimal for completing tasks effeciently.
 - Why is that tradeoff reasonable for this scenario?
+This is reasonable because high priority tasks should be completed first, even if multiple tasks could be packed at the same time.
+
 
 ---
 
@@ -45,7 +48,9 @@ Yes, I made a few small changes after reviewing my first skeleton. I added a pre
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+I used it to brainstorm, debug, and refactor. It helped make algorithmic and stylistic changes more effeciently.
 - What kinds of prompts or questions were most helpful?
+Longer prompts that made multiple changes at once were helpful
 
 **b. Judgment and verification**
 
@@ -81,3 +86,4 @@ Yes, I made a few small changes after reviewing my first skeleton. I added a pre
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+There are a lot of edge cases and design issues that you need to consider. 

@@ -1,9 +1,11 @@
 """Logic layer for PawPal+: Owner, Pet, Task, and Scheduler classes."""
 
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 from typing import List, Optional, Tuple
 
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
+RECURRENCE_DELTAS = {"daily": timedelta(days=1), "weekly": timedelta(days=7)}
 
 
 @dataclass
@@ -14,14 +16,39 @@ class Task:
     start_time: Optional[str] = None
     frequency: str = "daily"
     completed: bool = False
+    due_date: Optional[date] = None
 
     def get_priority(self) -> str:
         """Return this task's priority level."""
         return self.priority
 
-    def mark_complete(self) -> None:
-        """Mark this task as completed."""
+    def mark_complete(self) -> Optional["Task"]:
+        """Mark this task as completed and roll it forward if it recurs.
+
+        Non-recurring tasks (frequency not in RECURRENCE_DELTAS) are just marked
+        completed. Recurring tasks ("daily"/"weekly") are also marked completed,
+        and a new Task is returned for the next occurrence, due self.due_date
+        (or today, if unset) plus the recurrence interval.
+
+        Returns:
+            A new Task representing the next occurrence, or None if this task
+            does not recur.
+        """
         self.completed = True
+        delta = RECURRENCE_DELTAS.get(self.frequency.lower())
+        if delta is None:
+            return None
+
+        next_due = (self.due_date or date.today()) + delta
+        return Task(
+            name=self.name,
+            duration=self.duration,
+            priority=self.priority,
+            start_time=self.start_time,
+            frequency=self.frequency,
+            completed=False,
+            due_date=next_due,
+        )
 
 
 @dataclass
@@ -84,9 +111,24 @@ class Scheduler:
         self.plan: List[Tuple[Pet, Task]] = []
 
     def generate_plan(self, owner: Owner) -> List[Tuple[Pet, Task]]:
-        """Build a priority-sorted plan of tasks that fits within the available time."""
-        pending = [pair for pair in owner.get_all_tasks() if not pair[1].completed]
-        pending.sort(key=lambda pair: PRIORITY_ORDER.get(pair[1].priority.lower(), len(PRIORITY_ORDER)))
+        """Build a plan of pending tasks that fits within the available time.
+
+        Tasks are sorted by priority (high, then medium, then low) and packed
+        greedily in that order: a task is added if it fits in the remaining
+        time, otherwise it's skipped rather than stopping the loop, so
+        smaller, lower-priority tasks later in the order still get a chance
+        to fit.
+
+        Args:
+            owner: The owner whose pets' tasks should be considered.
+
+        Returns:
+            The generated plan, also stored on self.plan.
+        """
+        pending = sorted(
+            (pair for pair in owner.get_all_tasks() if not pair[1].completed),
+            key=lambda pair: PRIORITY_ORDER.get(pair[1].priority.lower(), len(PRIORITY_ORDER)),
+        )
 
         self.plan = []
         remaining_time = self.time_available
@@ -102,14 +144,30 @@ class Scheduler:
         return self.plan
 
     def sort_by_time(self) -> List[Tuple[Pet, Task]]:
-        """Sort the current plan by each task's start_time ("HH:MM"); tasks with no start_time sort last."""
+        """Sort the current plan chronologically by each task's start_time.
+
+        Times are compared as "HH:MM" strings, which sort correctly because
+        they're zero-padded. Tasks with no start_time are pushed to the end.
+
+        Returns:
+            The scheduler's plan, sorted in place.
+        """
         self.plan.sort(key=lambda pair: pair[1].start_time or "99:99")
         return self.plan
 
     def filter_tasks(
         self, completed: Optional[bool] = None, pet_name: Optional[str] = None
     ) -> List[Tuple[Pet, Task]]:
-        """Return plan entries filtered by completion status and/or pet name."""
+        """Return plan entries filtered by completion status and/or pet name.
+
+        Args:
+            completed: If set, only include tasks whose completed flag matches.
+            pet_name: If set, only include tasks belonging to the pet with
+                this name. Leave either argument as None to skip that filter.
+
+        Returns:
+            A new list of (pet, task) pairs; the current plan is unchanged.
+        """
         return [
             (pet, task)
             for pet, task in self.plan
@@ -120,3 +178,44 @@ class Scheduler:
     def schedule_task(self, pet: Pet, task: Task) -> None:
         """Manually append a (pet, task) pair to the current plan."""
         self.plan.append((pet, task))
+
+    def detect_conflicts(self) -> List[str]:
+        """Detect scheduling conflicts in the current plan.
+
+        Groups plan entries by exact start_time and flags any pair that
+        shares a time slot, regardless of which pet each task belongs to.
+        This is a lightweight check: it does not account for partial
+        overlaps between tasks with different start_times and durations.
+
+        Returns:
+            A human-readable warning message for each conflicting pair.
+            Empty if no conflicts are found.
+        """
+        warnings: List[str] = []
+        seen: dict[str, List[Tuple[Pet, Task]]] = {}
+        for pet, task in self.plan:
+            if not task.start_time:
+                continue
+            for other_pet, other_task in seen.get(task.start_time, []):
+                warnings.append(
+                    f"Conflict at {task.start_time}: '{task.name}' ({pet.get_name()}) "
+                    f"clashes with '{other_task.name}' ({other_pet.get_name()})"
+                )
+            seen.setdefault(task.start_time, []).append((pet, task))
+        return warnings
+
+    def complete_task(self, pet: Pet, task: Task) -> None:
+        """Mark a task complete and roll it forward if it recurs.
+
+        Delegates to Task.mark_complete(); if that returns a new Task for
+        the next occurrence (daily/weekly), it's appended to the pet's
+        task list.
+
+        Args:
+            pet: The pet the task belongs to. Its task list is mutated if
+                the task recurs.
+            task: The task to mark complete.
+        """
+        next_task = task.mark_complete()
+        if next_task is not None:
+            pet.add_task(next_task)
