@@ -68,6 +68,19 @@ Sample test output:
 ```
 # Paste your pytest output here
 ```
+====================================================================== test session starts ======================================================================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/jovialrana/Documents/CodePath/ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 10 items                                                                                                                                              
+
+tests/test_pawpal.py ..........                                                                                                                           [100%]
+
+====================================================================== 10 passed in 0.02s =======================================================================
+
+My tests cover scheduling conflicts, errors with marking completing tasks, and issues with adding tasks
+
+Confidence Level: 4
 
 ## 📐 Smarter Scheduling
 
