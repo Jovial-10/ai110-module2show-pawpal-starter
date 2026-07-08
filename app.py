@@ -85,13 +85,30 @@ st.subheader("Build Schedule")
 st.caption("Generates today's plan from the scheduler and the pet's tasks.")
 
 if st.button("Generate schedule"):
-    plan = st.session_state.scheduler.generate_plan(st.session_state.owner)
+    scheduler = st.session_state.scheduler
+    scheduler.generate_plan(st.session_state.owner)
+    plan = scheduler.sort_by_time()
+
     if plan:
-        st.write("Today's Schedule:")
-        for pet, task in plan:
-            st.write(
-                f"{task.start_time or '—'} — {task.name} ({task.duration} min) "
-                f"[priority: {task.priority}] — {pet.get_name()}"
-            )
+        st.success(f"Scheduled {len(plan)} task(s) within {scheduler.time_available} minutes.")
+        st.table(
+            [
+                {
+                    "start_time": task.start_time or "—",
+                    "task": task.name,
+                    "duration_minutes": task.duration,
+                    "priority": task.priority,
+                    "pet": pet.get_name(),
+                }
+                for pet, task in plan
+            ]
+        )
+
+        conflicts = scheduler.detect_conflicts()
+        if conflicts:
+            for warning in conflicts:
+                st.warning(warning)
+        else:
+            st.success("No scheduling conflicts detected.")
     else:
         st.info("No tasks fit in the available time. Add tasks above and try again.")

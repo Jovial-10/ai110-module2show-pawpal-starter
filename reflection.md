@@ -50,12 +50,14 @@ This is reasonable because high priority tasks should be completed first, even i
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 I used it to brainstorm, debug, and refactor. It helped make algorithmic and stylistic changes more effeciently.
 - What kinds of prompts or questions were most helpful?
-Longer prompts that made multiple changes at once were helpful
+Longer prompts that made multiple changes at once were helpful because they eliminated the need for multiple short prompts which would probably take more time.
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+The AI suggested some changes to the scheduler which didn't change much of the actual use of the function. 
 - How did you evaluate or verify what the AI suggested?
+I judged what the function currently did and what would've changed with the new suggestion that the AI thought of. The only main difference was really just a change in how the code looked, which had no difference if the function of the method didn't change. 
 
 ---
 
@@ -64,12 +66,16 @@ Longer prompts that made multiple changes at once were helpful
 **a. What you tested**
 
 - What behaviors did you test?
+I tested the sorting algorithms for tasks and task completion issues.
 - Why were these tests important?
+These tests were important because they handled edge cases and made sure that the pawpal program logic was working smoothly.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+I am pretty confident that the scheduler works correctly. 
 - What edge cases would you test next if you had more time?
+Maybe more specific edge cases like having multiple pets with same name, more deep scheduling conflicts, etc.
 
 ---
 
@@ -79,11 +85,14 @@ Longer prompts that made multiple changes at once were helpful
 
 - What part of this project are you most satisfied with?
 
+I am satisfied with the UML diagram and the relationships created between. I am also satisfied with the logic behind scheduler app because I think it captures the major components of what is necessary for a good scheduler.
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
+I would probably make the app more intricate by adding more features like, edit task, remove task, etc. I'd also like to make the UI better and more user friendly.
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
-There are a lot of edge cases and design issues that you need to consider. 
+There are a lot more edge cases and design issues that you need to consider that I originally had thought. Planning and documenting the progress is very important for future changes.

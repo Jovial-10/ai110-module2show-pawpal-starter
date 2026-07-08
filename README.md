@@ -82,6 +82,23 @@ My tests cover scheduling conflicts, errors with marking completing tasks, and i
 
 Confidence Level: 4
 
+## ✨ Features
+
+### Priority-First Planning
+`Scheduler.generate_plan(owner)` collects every pending (incomplete) task across all of an owner's pets, sorts them by priority (`high` → `medium` → `low`), and greedily packs them into the available time. If a higher-priority task doesn't fit, it's skipped rather than stopping the loop, so a smaller, lower-priority task later in line still gets a chance to fill the remaining time.
+
+### Sorting by Time
+`Scheduler.sort_by_time()` reorders the generated plan chronologically by each task's `start_time` (zero-padded `"HH:MM"` strings, compared lexicographically). Tasks with no `start_time` are pushed to the end instead of breaking the sort.
+
+### Conflict Warnings
+`Scheduler.detect_conflicts()` scans the current plan for tasks scheduled at the exact same `start_time` — regardless of which pet they belong to — and returns a list of human-readable warning strings instead of raising an error. It only catches exact time collisions, not partial overlaps between tasks with different durations.
+
+### Filtering
+`Scheduler.filter_tasks(completed=None, pet_name=None)` returns a filtered view of the plan by completion status and/or pet name, without mutating the underlying plan. Either filter can be omitted; combining both applies an AND.
+
+### Daily/Weekly Recurrence
+`Task.mark_complete()` marks a task completed and, if its `frequency` is `"daily"` or `"weekly"`, returns a new `Task` due one day or one week after its original `due_date` (or today, if unset). `Scheduler.complete_task(pet, task)` wraps this and automatically appends the new occurrence to the pet's task list, so recurring tasks regenerate themselves without manual re-entry.
+
 ## 📐 Smarter Scheduling
 
 | Feature | Method(s) | Notes |
@@ -93,12 +110,40 @@ Confidence Level: 4
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+### Main UI features
+- Enter owner and pet basic info (owner name, pet name, species).
+- Add tasks with a title, duration (minutes), and priority (`low`/`medium`/`high`).
+- View the pet's current task list in a table.
+- Generate today's schedule from the scheduler, sorted chronologically by start time.
+- See a confirmation message summarizing how many tasks were scheduled and how much time was used.
+- See a warning for any tasks scheduled at the same time as another task.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+### Example workflow
+1. Enter an owner name (e.g., "Jordan") and add a pet (e.g., "Mochi", species "dog").
+2. Add a task using the "Add task" form — e.g., "Morning walk", 20 minutes, high priority. Repeat for as many tasks as needed.
+3. Review the "Current tasks" table to confirm everything was added correctly.
+4. Click "Generate schedule." The scheduler pulls every pending task for the pet, sorts by priority, and greedily packs as many as fit into the available time (120 minutes by default).
+5. View "Today's Schedule" as a table sorted by start time, along with a success message and any conflict warnings.
+
+### Key Scheduler behaviors shown
+- **Priority-first packing**: high-priority tasks are considered before medium/low, but a lower-priority task can still fill leftover time a higher-priority task couldn't fit into.
+- **Chronological sorting**: the displayed schedule is ordered by `start_time` via `sort_by_time()`, not by priority or insertion order.
+- **Conflict detection**: if two tasks share the same `start_time`, `detect_conflicts()` surfaces a warning instead of silently double-booking.
+
+### Sample CLI output
+Output from running `python main.py`:
+
+```
+Today's Schedule
+09:00 — Morning walk (30 min) [priority: high] — Biscuit
+11:30 — Feeding (10 min) [priority: high] — Biscuit
+07:00 — Litter box cleaning (15 min) [priority: medium] — Luna
+09:00 — Evening walk (20 min) [priority: medium] — Luna
+
+Scheduling Warnings
+⚠️  Conflict at 09:00: 'Evening walk' (Luna) clashes with 'Morning walk' (Biscuit)
+```
+
+Note: `main.py` calls `generate_plan()` and `filter_tasks()` but not `sort_by_time()`, so this output is in priority-packing order rather than chronological order — the Streamlit UI (`app.py`) calls `sort_by_time()` before displaying the plan, so its table is time-sorted.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

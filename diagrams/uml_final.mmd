@@ -1,0 +1,56 @@
+classDiagram
+    class Owner {
+        +str name
+        +int age
+        +str gender
+        +List~Pet~ pets
+        +List~str~ preferences
+        +addPet(pet) None
+        +getName() str
+        +getPets() List~Pet~
+        +getPreferences() List~str~
+        +getAllTasks() List~Tuple~Pet, Task~~
+    }
+
+    class Pet {
+        +str name
+        +str type
+        +str color
+        +int hunger
+        +List~Task~ tasks
+        +getName() str
+        +addFood(amount) None
+        +addTask(task) None
+        +getTasks() List~Task~
+    }
+
+    class Task {
+        +str name
+        +int duration
+        +str priority
+        +str start_time
+        +str frequency
+        +bool completed
+        +date due_date
+        +getPriority() str
+        +markComplete() Optional~Task~
+    }
+
+    class Scheduler {
+        +int timeAvailable
+        +List~Tuple~Pet, Task~~ plan
+        +generatePlan(owner) List~Tuple~Pet, Task~~
+        +getPlan() List~Tuple~Pet, Task~~
+        +sortByTime() List~Tuple~Pet, Task~~
+        +filterTasks(completed, petName) List~Tuple~Pet, Task~~
+        +scheduleTask(pet, task) None
+        +detectConflicts() List~str~
+        +completeTask(pet, task) None
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Task : has
+    Scheduler "1" ..> "1" Owner : reads tasks from
+    Scheduler "1" o-- "0..*" Task : plans
+    Scheduler "1" o-- "0..*" Pet : plans
+    Task "1" ..> "0..1" Task : mark_complete() creates next occurrence
